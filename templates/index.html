@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServerZap</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #top-bar {
+            background-color: #075E54;
+            color: #FFF;
+            padding: 10px;
+            text-align: center;
+        }
+
+        #chat-container {
+            padding: 10px;
+            height: calc(100vh - 150px);
+            overflow-y: scroll;
+        }
+
+        #chat-container p {
+            background-color: #DCF8C6;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        #input-container {
+            display: flex;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #F4F4F4;
+            padding: 10px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #input-container input[type="text"] {
+            padding: 10px;
+            border: none;
+            outline: none;
+            flex: 1;
+        }
+
+        #input-container input#usuario {
+            margin-right: 10px;
+            width: 30%;
+        }
+
+        #input-container input#mensagem {
+            flex: 1;
+        }
+
+        #input-container button {
+            padding: 10px 20px;
+            background-color: #075E54;
+            color: #FFF;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js"></script>
+</head>
+<body>
+    <div id="top-bar">
+        <h1>ServerZap</h1>
+    </div>
+
+    <div id="chat-container">
+        <p>Bem-vindo ao ServerZap!</p>
+    </div>
+
+    <div id="input-container">
+        <input type="text" id="usuario" placeholder="Usuário" required>
+        <input type="text" id="mensagem" placeholder="Mensagem" required>
+        <button id="botao">Enviar</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const socket = io();
+
+            // Evento ao conectar
+            socket.on("connect", function () {
+                console.log("Conectado ao servidor");
+            });
+
+            // Receber mensagens do servidor
+            socket.on("message", function (data) {
+                const chatContainer = document.getElementById("chat-container");
+                const mensagem = document.createElement("p");
+                mensagem.textContent = data;
+                chatContainer.appendChild(mensagem);
+
+                // Rolar para o final
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+
+            // Enviar mensagens para o servidor
+            const botao = document.getElementById("botao");
+            botao.addEventListener("click", function () {
+                const usuario = document.getElementById("usuario").value;
+                const mensagem = document.getElementById("mensagem").value;
+
+                if (usuario && mensagem) {
+                    socket.send(`${usuario}: ${mensagem}`);
+                    document.getElementById("mensagem").value = ""; // Limpar o campo de mensagem
+                } else {
+                    alert("Por favor, preencha o usuário e a mensagem!");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
